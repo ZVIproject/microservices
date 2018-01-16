@@ -1,0 +1,14 @@
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://${eureka.url}/eureka/
+  instance:
+    hostname: localhost
+  url: 127.0.0.1:8002
+
+spring:
+  application:
+    name: db-change-service

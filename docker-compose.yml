@@ -1,0 +1,77 @@
+version: '3'
+services:
+
+  # instance of eureka service
+  eureka:
+    image: eureka-service:latest
+    restart: always  
+    ports:
+     - "8002:8002"
+
+# instance of balancer
+  balancer-service:
+    image: balancer-service:latest
+    restart: always
+    ports:
+      - "8004:8004"
+    environment:
+      - dbGetHostname=db-get-service
+      - dbGetPort=7998
+      - dbChangeHost=db-change-service
+      - dbChangePort=8001
+
+# instance of statistic service
+  statistic:
+    image: statistic-service:latest
+    restart: always
+    ports:
+      - "8003:8003"
+    environment:
+      - rabbitHostname=rabbit
+      - eurekaUrl=eureka:8002
+    links:
+      - rabbit
+
+# instance of rabbit service   
+  rabbit:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - 15672:15672
+      - 5672:5672
+      - 5671:5671
+    
+# instance of db-get service
+  db-get-service:
+    image: db-get-service:latest
+    restart: always
+
+    environment:
+      - dbHostname=docker.for.mac.localhost
+      - rabbitHostname=rabbit
+      - eurekaUrl=eureka:8002
+   
+    links:
+      - rabbit
+      - eureka
+
+    deploy:
+      replicas: 3
+
+# instance of db-change service
+  db-change-service:
+    image: db-change-service:latest
+    restart: always
+
+    environment:
+      - dbHostname=docker.for.mac.localhost
+      - rabbitHostname=rabbit
+      - eurekaUrl=eureka:8002
+   
+    links:
+      - rabbit
+      - eureka
+
+    deploy:
+      replicas: 3
+
